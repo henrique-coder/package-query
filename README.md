@@ -14,13 +14,6 @@ uv pip install "package-query@git+https://github.com/henrique-coder/package-quer
 uv pip install "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git"
 ```
 
-### From PyPI (future)
-
-```bash
-uv pip install package-query       # Core only
-uv pip install package-query[mcp]  # With MCP server
-```
-
 ## Python Usage
 
 ```python
@@ -80,7 +73,7 @@ Add to your `settings.json`:
         "command": "uvx",
         "args": [
           "--from",
-          "package-query[mcp] @ git+https://github.com/henrique-coder/package-query.git",
+          "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git",
           "package-query-mcp"
         ]
       }
@@ -111,7 +104,31 @@ Add to `~/.config/Claude/claude_desktop_config.json` (Linux) or equivalent:
 {
   "mcpServers": {
     "package-query": {
-      "command": "package-query-mcp"
+      "command": "uvx",
+      "args": [
+        "--from",
+        "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git",
+        "package-query-mcp"
+      ]
+    }
+  }
+}
+```
+
+#### Antigravity IDE
+
+Add to `~/.gemini/antigravity/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "package-query": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git",
+        "package-query-mcp"
+      ]
     }
   }
 }
@@ -135,16 +152,9 @@ Add to `~/.config/Claude/claude_desktop_config.json` (Linux) or equivalent:
 # Clone and install all dependencies
 git clone https://github.com/henrique-coder/package-query.git
 cd package-query
-uv sync --all-groups
-
-# Run example
-uv run python example.py
-
-# Lint
-uv run --group lint ruff check .
-uv run --group lint ty .
+uv sync --upgrade --all-groups --all-extras
 ```
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
