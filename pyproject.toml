@@ -1,6 +1,6 @@
 [project]
 name = "package-query"
-version = "0.1.1"
+version = "0.1.0"
 description = "Query latest package versions from PyPI, npm, crates.io, Docker Hub, and GitHub Actions"
 readme = "README.md"
 authors = [
