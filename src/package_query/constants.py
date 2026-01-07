@@ -1,13 +1,10 @@
 from re import Pattern, compile
 from typing import Final
 
+
 PYPI_PACKAGE_PATTERN: Final[Pattern[str]] = compile(r"^[a-zA-Z0-9_-]+$")
-GITHUB_REPO_PATTERN: Final[Pattern[str]] = compile(
-    r"^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?/[a-zA-Z0-9._-]+$"
-)
-NPM_PACKAGE_PATTERN: Final[Pattern[str]] = compile(
-    r"^(@[a-zA-Z0-9_-]+/)?[a-zA-Z0-9._-]+$"
-)
+GITHUB_REPO_PATTERN: Final[Pattern[str]] = compile(r"^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?/[a-zA-Z0-9._-]+$")
+NPM_PACKAGE_PATTERN: Final[Pattern[str]] = compile(r"^(@[a-zA-Z0-9_-]+/)?[a-zA-Z0-9._-]+$")
 CRATES_PACKAGE_PATTERN: Final[Pattern[str]] = compile(r"^[a-zA-Z][a-zA-Z0-9_-]*$")
 DOCKER_IMAGE_PATTERN: Final[Pattern[str]] = compile(r"^[a-z0-9_-]+(/[a-z0-9._-]+)?$")
 

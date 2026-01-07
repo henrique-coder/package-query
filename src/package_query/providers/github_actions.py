@@ -1,7 +1,7 @@
 from typing import Final
 
-import orjson
 from curl_cffi.requests import AsyncSession
+import orjson
 
 from package_query.constants import (
     GITHUB_API_BASE_URL,
@@ -27,9 +27,7 @@ class GitHubActionsProvider:
         fallback: bool = True,
     ) -> PackageInfo:
         if not GITHUB_REPO_PATTERN.match(package):
-            raise ValueError(
-                f"Invalid action format '{package}'. Expected 'owner/repo'"
-            )
+            raise ValueError(f"Invalid action format '{package}'. Expected 'owner/repo'")
 
         owner, repo = package.split("/", 1)
         tags_url: str = f"{GITHUB_API_BASE_URL}/{owner}/{repo}/tags"

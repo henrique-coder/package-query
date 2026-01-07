@@ -29,9 +29,7 @@ class PackageQuery:
         provider_class = self.REGISTRIES.get(registry.lower())
         if provider_class is None:
             supported: str = ", ".join(self.REGISTRIES.keys())
-            raise ValueError(
-                f"Unsupported registry '{registry}'. Supported: {supported}"
-            )
+            raise ValueError(f"Unsupported registry '{registry}'. Supported: {supported}")
         return await provider_class().get_package_info(
             package,
             include_prerelease=include_prerelease,
