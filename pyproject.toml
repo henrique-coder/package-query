@@ -1,0 +1,35 @@
+[project]
+name = "package-query"
+version = "0.1.0"
+description = "Query latest package versions from PyPI, npm, crates.io, Docker Hub, and GitHub Actions"
+readme = "README.md"
+authors = [
+    { name = "Henrique", email = "henriquemoreira10fk@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "curl-cffi>=0.14.0",
+    "orjson>=3.11.5",
+    "pydantic>=2.12.5",
+]
+
+[project.optional-dependencies]
+mcp = [
+    "fastmcp>=2.14.2"
+]
+
+[dependency-groups]
+dev = [
+    "rich>=14.2.0"
+]
+lint = [
+    "ruff>=0.14.10",
+    "ty>=0.0.9",
+]
+
+[project.scripts]
+package-query-mcp = "package_query.mcp_server:main"
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"

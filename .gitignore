@@ -1,0 +1,19 @@
+# IDE
+.idea/
+
+# Cache
+.venv/
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+node_modules/
+
+# Directories
+.debug/
+
+# Files
+example.py
+
+# Extensions
+*.env
+*.log
