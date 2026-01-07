@@ -1,6 +1,6 @@
 version = 1
 revision = 3
-requires-python = ">=3.10"
+requires-python = ">=3.10, <3.15"
 
 [[package]]
 name = "annotated-types"
@@ -969,7 +969,7 @@ wheels = [
 
 [[package]]
 name = "package-query"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "curl-cffi" },

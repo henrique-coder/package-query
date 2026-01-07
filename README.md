@@ -4,14 +4,12 @@ Query the latest package versions from **PyPI**, **npm**, **crates.io**, **Docke
 
 ## Installation
 
-### From GitHub (with uv)
-
 ```bash
 # Core library only
-uv pip install "package-query@git+https://github.com/henrique-coder/package-query.git"
+uv pip install package-query
 
 # With MCP server support
-uv pip install "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git"
+uv pip install "package-query[mcp]"
 ```
 
 ## Python Usage
@@ -71,18 +69,14 @@ Add to your `settings.json`:
     "servers": {
       "package-query": {
         "command": "uvx",
-        "args": [
-          "--from",
-          "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git",
-          "package-query-mcp"
-        ]
+        "args": ["--from", "package-query[mcp]", "package-query-mcp"]
       }
     }
   }
 }
 ```
 
-Or if installed locally:
+Or if installed globally:
 
 ```json
 {
@@ -105,11 +99,7 @@ Add to `~/.config/Claude/claude_desktop_config.json` (Linux) or equivalent:
   "mcpServers": {
     "package-query": {
       "command": "uvx",
-      "args": [
-        "--from",
-        "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git",
-        "package-query-mcp"
-      ]
+      "args": ["--from", "package-query[mcp]", "package-query-mcp"]
     }
   }
 }
@@ -124,11 +114,7 @@ Add to `~/.gemini/antigravity/mcp_config.json`:
   "mcpServers": {
     "package-query": {
       "command": "uvx",
-      "args": [
-        "--from",
-        "package-query[mcp]@git+https://github.com/henrique-coder/package-query.git",
-        "package-query-mcp"
-      ]
+      "args": ["--from", "package-query[mcp]", "package-query-mcp"]
     }
   }
 }
@@ -153,6 +139,8 @@ Add to `~/.gemini/antigravity/mcp_config.json`:
 git clone https://github.com/henrique-coder/package-query.git
 cd package-query
 uv sync --upgrade --all-groups --all-extras
+just lint
+just format
 ```
 
 ## License

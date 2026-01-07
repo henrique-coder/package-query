@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Any, Final
 
-import orjson
 from curl_cffi.requests import AsyncSession
+import orjson
 
 from package_query.constants import HTTP_HEADERS, PYPI_PACKAGE_PATTERN
 from package_query.models import PackageInfo
@@ -12,9 +12,7 @@ class PyPIPiwheelsSource:
     NAME: Final[str] = "piwheels"
     BASE_URL: Final[str] = "https://www.piwheels.org/project"
 
-    async def fetch(
-        self, package: str, include_prerelease: bool = False
-    ) -> PackageInfo:
+    async def fetch(self, package: str, include_prerelease: bool = False) -> PackageInfo:
         url: str = f"{self.BASE_URL}/{package}/json/"
 
         async with AsyncSession() as session:
@@ -56,9 +54,7 @@ class PyPIPiwheelsSource:
             name=data.get("package", package),
             version=latest_version,
             summary=data.get("summary"),
-            released_at=latest_released.strftime("%Y-%m-%dT%H:%M:%SZ")
-            if latest_released
-            else None,
+            released_at=latest_released.strftime("%Y-%m-%dT%H:%M:%SZ") if latest_released else None,
             is_prerelease=is_prerelease,
             homepage_url=data.get("pypi_url"),
             registry_url=data.get("pypi_url"),
@@ -69,9 +65,7 @@ class PyPIOfficialSource:
     NAME: Final[str] = "pypi"
     BASE_URL: Final[str] = "https://pypi.org/pypi"
 
-    async def fetch(
-        self, package: str, include_prerelease: bool = False
-    ) -> PackageInfo:
+    async def fetch(self, package: str, include_prerelease: bool = False) -> PackageInfo:
         url: str = f"{self.BASE_URL}/{package}/json"
 
         async with AsyncSession() as session:
@@ -88,7 +82,7 @@ class PyPIOfficialSource:
         releases: dict[str, list[dict[str, Any]]] = data.get("releases", {})
 
         released_at: str | None = None
-        if version in releases and releases[version]:
+        if releases.get(version):
             upload_time: str | None = releases[version][0].get("upload_time_iso_8601")
             if upload_time:
                 released_at = upload_time[:19] + "Z"
@@ -99,8 +93,7 @@ class PyPIOfficialSource:
             summary=info.get("summary"),
             released_at=released_at,
             is_prerelease=False,
-            homepage_url=info.get("project_url")
-            or f"https://pypi.org/project/{package}",
+            homepage_url=info.get("project_url") or f"https://pypi.org/project/{package}",
             registry_url=f"https://pypi.org/project/{package}",
         )
 
@@ -127,12 +120,8 @@ class PyPIProvider:
         if source:
             source_class = self.SOURCE_MAP.get(source.lower())
             if not source_class:
-                raise ValueError(
-                    f"Unknown source '{source}'. Available: {list(self.SOURCE_MAP.keys())}"
-                )
-            sources = [source_class] + (
-                [s for s in self.SOURCES if s != source_class] if fallback else []
-            )
+                raise ValueError(f"Unknown source '{source}'. Available: {list(self.SOURCE_MAP.keys())}")
+            sources = [source_class] + ([s for s in self.SOURCES if s != source_class] if fallback else [])
         else:
             sources = list(self.SOURCES) if fallback else [self.SOURCES[0]]
 
@@ -141,9 +130,7 @@ class PyPIProvider:
 
         for i, source_class in enumerate(sources):
             try:
-                result: PackageInfo = await source_class().fetch(
-                    package, include_prerelease
-                )
+                result: PackageInfo = await source_class().fetch(package, include_prerelease)
                 result.registry = self.REGISTRY_NAME
                 result.source_used = source_class.NAME
                 result.sources_failed = sources_failed

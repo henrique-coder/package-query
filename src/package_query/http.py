@@ -1,7 +1,7 @@
 from typing import Any
 
-import orjson
 from curl_cffi.requests import AsyncSession
+import orjson
 
 
 async def fetch_json(url: str, headers: dict[str, str]) -> dict[str, Any]:

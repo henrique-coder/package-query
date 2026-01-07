@@ -41,9 +41,7 @@ class NpmProvider:
             name=data.get("name", package),
             version=version,
             summary=data.get("description"),
-            released_at=released_at.replace("Z", "").split(".")[0] + "Z"
-            if released_at
-            else None,
+            released_at=released_at.replace("Z", "").split(".")[0] + "Z" if released_at else None,
             is_prerelease="next" in dist_tags and version == dist_tags.get("next"),
             homepage_url=f"{NPM_BASE_URL}/{package}",
             registry_url=f"{NPM_BASE_URL}/{package}",

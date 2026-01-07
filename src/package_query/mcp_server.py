@@ -8,6 +8,7 @@ from fastmcp import FastMCP
 
 from package_query import PackageQuery
 
+
 mcp = FastMCP(
     "package-query",
     "Query latest package versions from PyPI, npm, crates.io, Docker Hub, and GitHub Actions",
