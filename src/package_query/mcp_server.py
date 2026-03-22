@@ -10,8 +10,8 @@ from package_query import PackageQuery
 
 
 mcp = FastMCP(
-    "package-query",
-    "Query latest package versions from PyPI, npm, crates.io, Docker Hub, and GitHub Actions",
+    name="package-query",
+    instructions="Query latest package versions from PyPI, npm, crates.io, Docker Hub, and GitHub Actions",
 )
 
 
@@ -28,13 +28,10 @@ async def get_package_version(
         registry: One of: pypi, npm, crates, docker, github-actions
         package: Package name (e.g. "requests", "express", "nginx", "actions/checkout")
         include_prerelease: Include pre-release versions if True (default: False)
-
-    Returns:
-        A formatted string with package name, version, and registry URL
     """
     pq = PackageQuery()
     info = await pq.query(registry, package, include_prerelease=include_prerelease)
-    return f"{info.name}=={info.version} ({info.registry_url})"
+    return info.version
 
 
 def main() -> None:

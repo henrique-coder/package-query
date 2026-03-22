@@ -2,7 +2,6 @@ from typing import Final
 
 from package_query.constants import (
     HTTP_HEADERS,
-    NPM_BASE_URL,
     NPM_PACKAGE_PATTERN,
     NPM_REGISTRY_URL,
 )
@@ -34,19 +33,10 @@ class NpmProvider:
         if include_prerelease and "next" in dist_tags:
             version = dist_tags["next"]
 
-        time_data: dict = data.get("time", {})
-        released_at: str | None = time_data.get(version)
-
         return PackageInfo(
             name=data.get("name", package),
             version=version,
-            summary=data.get("description"),
-            released_at=released_at.replace("Z", "").split(".")[0] + "Z" if released_at else None,
             is_prerelease="next" in dist_tags and version == dist_tags.get("next"),
-            homepage_url=f"{NPM_BASE_URL}/{package}",
-            registry_url=f"{NPM_BASE_URL}/{package}",
             registry=self.REGISTRY_NAME,
             source_used=self.SOURCE_NAME,
-            sources_failed=[],
-            sources_remaining=[],
         )

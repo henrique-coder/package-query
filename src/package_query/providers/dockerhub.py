@@ -3,7 +3,6 @@ from typing import Final
 from package_query.constants import (
     DOCKER_IMAGE_PATTERN,
     DOCKERHUB_API_URL,
-    DOCKERHUB_BASE_URL,
     HTTP_HEADERS,
 )
 from package_query.http import fetch_json
@@ -46,19 +45,12 @@ class DockerHubProvider:
             latest_tag = results[0]
 
         version: str = latest_tag.get("name", "latest")
-        last_updated: str | None = latest_tag.get("last_updated")
         display_name: str = repo if namespace == "library" else package
 
         return PackageInfo(
             name=display_name,
             version=version,
-            summary=None,
-            released_at=last_updated[:19] + "Z" if last_updated else None,
             is_prerelease=False,
-            homepage_url=f"{DOCKERHUB_BASE_URL}/{package}",
-            registry_url=f"{DOCKERHUB_BASE_URL}/{package}",
             registry=self.REGISTRY_NAME,
             source_used=self.SOURCE_NAME,
-            sources_failed=[],
-            sources_remaining=[],
         )

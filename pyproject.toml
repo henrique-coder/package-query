@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Query latest package versions from PyPI, npm, crates.io, Docker Hub, and GitHub Actions"
 readme = "README.md"
 authors = [
-    { name = "Henrique", email = "henriquemoreira10fk@gmail.com" }
+    { name = "Henrique Moreira", email = "github@henriquecoder.com" }
 ]
 keywords = ["mcp", "pypi", "npm", "crates.io", "docker", "github actions"]
 classifiers = [
@@ -25,22 +25,22 @@ classifiers = [
 requires-python = ">=3.10,<3.15"
 dependencies = [
     "curl-cffi>=0.14.0",
-    "orjson>=3.11.5",
+    "orjson>=3.11.7",
     "pydantic>=2.12.5",
 ]
 
 [project.optional-dependencies]
 mcp = [
-    "fastmcp>=2.14.2"
+    "fastmcp>=3.1.1"
 ]
 
 [dependency-groups]
 dev = [
-    "rich>=14.2.0"
+    "rich>=14.3.3"
 ]
 lint = [
-    "ruff>=0.14.10",
-    "ty>=0.0.9",
+    "ruff>=0.15.7",
+    "ty>=0.0.24",
 ]
 
 [project.urls]
@@ -56,49 +56,84 @@ indent-width = 4
 
 [tool.ruff.lint]
 select = [
-    "F",      # Pyflakes: unused imports/variables, undefined names
-    "E",      # pycodestyle errors: basic PEP 8 style violations
-    "W",      # pycodestyle warnings: whitespace issues, blank lines
-    "I",      # isort: import sorting and organization
-    "UP",     # pyupgrade: upgrade syntax for newer Python versions
-    "B",      # flake8-bugbear: common bugs and design problems
-    "SIM",    # flake8-simplify: simplify complex code patterns
-    "C4",     # flake8-comprehensions: better list/dict/set comprehensions
-    "PIE",    # flake8-pie: misc. lints (unnecessary pass, duplicate keys)
-    "RUF",    # Ruff-specific: modern Python best practices
-    "PERF",   # Perflint: performance anti-patterns
-    "FURB",   # refurb: modernize legacy Python idioms
-    "PTH",    # flake8-use-pathlib: prefer pathlib over os.path
-    "T20",    # flake8-print: detect leftover print() statements
-    "TCH",    # flake8-type-checking: optimize TYPE_CHECKING imports
-    "PL",     # Pylint: broad set of code quality checks
-    "D205",   # 1 blank line required between docstring and code
+    "F",     # Pyflakes: unused imports/variables, undefined names
+    "E",     # pycodestyle errors: PEP 8 style violations
+    "W",     # pycodestyle warnings: whitespace and blank line issues
+    "I",     # isort: import sorting and organization
+    "N",     # pep8-naming: PEP 8 naming conventions
+    "UP",    # pyupgrade: upgrade syntax for newer Python versions
+    "ANN",   # flake8-annotations: enforce type hints
+    "FA",    # flake8-future-annotations: require from __future__ import annotations
+    "ICN",   # flake8-import-conventions: standard import aliases
+    "B",     # flake8-bugbear: common bugs and design problems
+    "SIM",   # flake8-simplify: simplify complex code patterns
+    "C4",    # flake8-comprehensions: better list/dict/set comprehensions
+    "PIE",   # flake8-pie: unnecessary pass, duplicate keys
+    "ISC",   # flake8-implicit-str-concat: implicit string concatenation
+    "RSE",   # flake8-raise: unnecessary parentheses on raise
+    "RET",   # flake8-return: return statement best practices
+    "PTH",   # flake8-use-pathlib: prefer pathlib over os.path
+    "T20",   # flake8-print: detect leftover print() statements
+    "TCH",   # flake8-type-checking: optimize TYPE_CHECKING imports
+    "G",     # flake8-logging-format: logging best practices
+    "LOG",   # flake8-logging: correct use of logging module
+    "TRY",   # tryceratops: try/except best practices
+    "ERA",   # eradicate: detect commented-out code
+    "PERF",  # Perflint: performance anti-patterns
+    "FURB",  # refurb: modernize legacy Python idioms
+    "PL",    # Pylint: broad code quality checks
+    "RUF",   # Ruff-specific: modern Python best practices
+    "D205",  # pydocstyle: blank line required between summary and description
 ]
 ignore = [
-    "PLR0912",   # Too many branches (complex validation logic is acceptable)
-    "PLR0913",   # Too many arguments in function definition (common in APIs)
-    "PLR2004",   # Magic value used in comparison (too strict for general use)
+    "ISC001",   # Implicit string concatenation on one line: conflicts with formatter
+    "TRY003",   # Long exception messages outside exception class: overly opinionated
+    "TRY301",   # Abstract raise to inner function: too opinionated for validation code
+    "G004",     # Logging with f-string: loguru prefers f-strings
+    "PLE1205",  # Too many arguments for logging format: false positive for loguru {}
+    "PLR0912",  # Too many branches: acceptable for complex validation logic
+    "PLR0913",  # Too many arguments: common in APIs and constructors
+    "PLR0915",  # Too many statements: acceptable for complex validation logic
+    "PLR2004",  # Magic value in comparison: too strict for general use
 ]
-fixable = ["ALL"]            # Allow auto-fix for all enabled rules
-dummy-variable-rgx = "^_$"   # Only underscore is considered a dummy variable
+fixable = ["ALL"]
 
 [tool.ruff.lint.isort]
-lines-after-imports = 2             # PEP 8: two blank lines after imports
-force-sort-within-sections = true   # Alphabetical order within each section
-split-on-trailing-comma = true      # Trailing comma triggers multi-line format
+lines-after-imports = 2
+force-sort-within-sections = true
+split-on-trailing-comma = true
+known-first-party = []
 
 [tool.ruff.lint.pydocstyle]
-convention = "google"   # Google-style docstrings (Args, Returns, Raises)
+convention = "google"
 
 [tool.ruff.lint.flake8-quotes]
-docstring-quotes = "double"   # Docstrings must use triple double quotes
+docstring-quotes = "double"
+
+[tool.ruff.lint.flake8-annotations]
+suppress-none-returning = true
+allow-star-arg-any = true
 
 [tool.ruff.format]
-quote-style = "double"              # Strings use double quotes (PEP 8 preference)
-indent-style = "space"              # Spaces over tabs (PEP 8)
-line-ending = "lf"                  # Unix-style line endings
-docstring-code-format = true        # Format code examples inside docstrings
-skip-magic-trailing-comma = false   # Preserve trailing commas as formatting hints
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true
+skip-magic-trailing-comma = false
+
+[tool.ty.rules]
+invalid-argument-type         = "error"
+invalid-return-type           = "error"
+missing-argument              = "error"
+too-many-positional-arguments = "error"
+unresolved-attribute          = "error"
+unresolved-import             = "error"
+unsupported-operator          = "error"
+possibly-missing-attribute    = "warn"
+redundant-cast                = "warn"
+unused-ignore-comment         = "warn"
+division-by-zero              = "warn"
+index-out-of-bounds           = "warn"
 
 [project.scripts]
 package-query-mcp = "package_query.mcp_server:main"

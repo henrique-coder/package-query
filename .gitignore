@@ -9,6 +9,7 @@ __pycache__/
 node_modules/
 
 # Directories
+.vscode/
 .debug/
 
 # Files

@@ -1,11 +1,17 @@
 from datetime import datetime
-from typing import Any, Final
+from typing import Final, Protocol
 
 from curl_cffi.requests import AsyncSession
-import orjson
+from orjson import loads
 
 from package_query.constants import HTTP_HEADERS, PYPI_PACKAGE_PATTERN
 from package_query.models import PackageInfo
+
+
+class PyPISourceProtocol(Protocol):
+    NAME: str
+
+    async def fetch(self, package: str, include_prerelease: bool = False) -> PackageInfo: ...
 
 
 class PyPIPiwheelsSource:
@@ -22,7 +28,7 @@ class PyPIPiwheelsSource:
             raise ValueError(f"Package '{package}' not found")
 
         response.raise_for_status()
-        data: dict = orjson.loads(response.content)
+        data: dict = loads(response.content)
         releases: dict = data.get("releases", {})
 
         if not releases:
@@ -41,11 +47,12 @@ class PyPIPiwheelsSource:
             released: datetime = datetime.fromisoformat(released_str.replace(" ", "T"))
             version_is_prerelease: bool = info.get("prerelease", False)
 
-            if include_prerelease or not version_is_prerelease:
-                if latest_released is None or released > latest_released:
-                    latest_version = version
-                    latest_released = released
-                    is_prerelease = version_is_prerelease
+            if (include_prerelease or not version_is_prerelease) and (
+                latest_released is None or released > latest_released
+            ):
+                latest_version = version
+                latest_released = released
+                is_prerelease = version_is_prerelease
 
         if latest_version is None:
             raise ValueError(f"Package '{package}' has no valid releases")
@@ -53,11 +60,7 @@ class PyPIPiwheelsSource:
         return PackageInfo(
             name=data.get("package", package),
             version=latest_version,
-            summary=data.get("summary"),
-            released_at=latest_released.strftime("%Y-%m-%dT%H:%M:%SZ") if latest_released else None,
             is_prerelease=is_prerelease,
-            homepage_url=data.get("pypi_url"),
-            registry_url=data.get("pypi_url"),
         )
 
 
@@ -75,35 +78,24 @@ class PyPIOfficialSource:
             raise ValueError(f"Package '{package}' not found")
 
         response.raise_for_status()
-        data: dict = orjson.loads(response.content)
+        data: dict = loads(response.content)
 
         info: dict = data.get("info", {})
         version: str = info.get("version", "")
-        releases: dict[str, list[dict[str, Any]]] = data.get("releases", {})
-
-        released_at: str | None = None
-        if releases.get(version):
-            upload_time: str | None = releases[version][0].get("upload_time_iso_8601")
-            if upload_time:
-                released_at = upload_time[:19] + "Z"
 
         return PackageInfo(
             name=info.get("name", package),
             version=version,
-            summary=info.get("summary"),
-            released_at=released_at,
             is_prerelease=False,
-            homepage_url=info.get("project_url") or f"https://pypi.org/project/{package}",
-            registry_url=f"https://pypi.org/project/{package}",
         )
 
 
 class PyPIProvider:
     REGISTRY_NAME: Final[str] = "pypi"
-    SOURCES: Final[list[type]] = [PyPIPiwheelsSource, PyPIOfficialSource]
-    SOURCE_MAP: Final[dict[str, type]] = {
-        "piwheels": PyPIPiwheelsSource,
+    SOURCES: Final[list[type[PyPISourceProtocol]]] = [PyPIOfficialSource, PyPIPiwheelsSource]
+    SOURCE_MAP: Final[dict[str, type[PyPISourceProtocol]]] = {
         "pypi": PyPIOfficialSource,
+        "piwheels": PyPIPiwheelsSource,
     }
 
     async def get_package_info(
@@ -128,18 +120,17 @@ class PyPIProvider:
         sources_failed: list[str] = []
         last_error: Exception | None = None
 
-        for i, source_class in enumerate(sources):
+        for source_class in sources:
             try:
                 result: PackageInfo = await source_class().fetch(package, include_prerelease)
-                result.registry = self.REGISTRY_NAME
-                result.source_used = source_class.NAME
-                result.sources_failed = sources_failed
-                result.sources_remaining = [s.NAME for s in sources[i + 1 :]]
-                return result
-            except Exception as e:
+            except Exception as e:  # noqa: PERF203
                 sources_failed.append(source_class.NAME)
                 last_error = e
                 if not fallback:
                     raise
+            else:
+                result.registry = self.REGISTRY_NAME
+                result.source_used = source_class.NAME
+                return result
 
         raise last_error or ValueError(f"Failed to fetch package '{package}'")
