@@ -22,25 +22,25 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.10, <3.15"
 dependencies = [
-    "curl-cffi>=0.14.0",
-    "orjson>=3.11.7",
-    "pydantic>=2.12.5",
+    "curl-cffi>=0.15.0",
+    "orjson>=3.11.9",
+    "pydantic>=2.13.4",
 ]
 
 [project.optional-dependencies]
 mcp = [
-    "fastmcp>=3.1.1"
+    "fastmcp>=3.3.1"
 ]
 
 [dependency-groups]
 dev = [
-    "rich>=14.3.3"
+    "rich>=15.0.0"
 ]
 lint = [
-    "ruff>=0.15.7",
-    "ty>=0.0.24",
+    "ruff>=0.15.13",
+    "ty>=0.0.36",
 ]
 
 [project.urls]
