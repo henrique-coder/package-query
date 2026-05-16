@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Final
 
 from package_query.constants import (
@@ -7,13 +9,13 @@ from package_query.constants import (
     MAJOR_VERSION_PATTERN,
     SEMVER_PATTERN,
 )
+from package_query.exceptions import InvalidPackageNameError, PackageNotFoundError
 from package_query.http import fetch_json
 from package_query.models import PackageInfo
 
 
 class GitHubActionsProvider:
     REGISTRY_NAME: Final[str] = "github-actions"
-    SOURCE_NAME: Final[str] = "github-api"
 
     async def get_package_info(
         self,
@@ -24,20 +26,18 @@ class GitHubActionsProvider:
         fallback: bool = True,
     ) -> PackageInfo:
         if not GITHUB_REPO_PATTERN.match(package):
-            raise ValueError(f"Invalid action format '{package}'. Expected 'owner/repo'")
+            raise InvalidPackageNameError(f"Invalid action format '{package}'. Expected 'owner/repo'")
 
         owner, repo = package.split("/", 1)
         tags_url: str = f"{GITHUB_API_BASE_URL}/{owner}/{repo}/tags"
 
         try:
             tags: list[dict] = await fetch_json(tags_url, GITHUB_HEADERS)
-        except ValueError as e:
-            if str(e) == "Not found":
-                raise ValueError(f"Action '{package}' not found") from e
-            raise
+        except PackageNotFoundError:
+            raise PackageNotFoundError(f"Action '{package}' not found") from None
 
         if not tags:
-            raise ValueError(f"Action '{package}' has no tags")
+            raise PackageNotFoundError(f"Action '{package}' has no tags")
 
         major_versions: dict[int, str] = {}
         latest_semver: tuple[int, int, int] | None = None
@@ -68,7 +68,6 @@ class GitHubActionsProvider:
         return PackageInfo(
             name=package,
             version=version,
-            is_prerelease=False,
             registry=self.REGISTRY_NAME,
-            source_used=self.SOURCE_NAME,
+            is_prerelease=False,
         )

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Final, Protocol
 
@@ -5,6 +7,7 @@ from curl_cffi.requests import AsyncSession
 from orjson import loads
 
 from package_query.constants import HTTP_HEADERS, PYPI_PACKAGE_PATTERN
+from package_query.exceptions import InvalidPackageNameError, PackageNotFoundError
 from package_query.models import PackageInfo
 
 
@@ -25,14 +28,14 @@ class PyPIPiwheelsSource:
             response = await session.get(url, headers=HTTP_HEADERS)
 
         if response.status_code == 404:
-            raise ValueError(f"Package '{package}' not found")
+            raise PackageNotFoundError(f"Package '{package}' not found on piwheels")
 
         response.raise_for_status()
         data: dict = loads(response.content)
         releases: dict = data.get("releases", {})
 
         if not releases:
-            raise ValueError(f"Package '{package}' has no releases")
+            raise PackageNotFoundError(f"Package '{package}' has no releases on piwheels")
 
         latest_version: str | None = None
         latest_released: datetime | None = None
@@ -55,11 +58,12 @@ class PyPIPiwheelsSource:
                 is_prerelease = version_is_prerelease
 
         if latest_version is None:
-            raise ValueError(f"Package '{package}' has no valid releases")
+            raise PackageNotFoundError(f"Package '{package}' has no valid releases on piwheels")
 
         return PackageInfo(
             name=data.get("package", package),
             version=latest_version,
+            registry=PyPIProvider.REGISTRY_NAME,
             is_prerelease=is_prerelease,
         )
 
@@ -75,7 +79,7 @@ class PyPIOfficialSource:
             response = await session.get(url, headers=HTTP_HEADERS)
 
         if response.status_code == 404:
-            raise ValueError(f"Package '{package}' not found")
+            raise PackageNotFoundError(f"Package '{package}' not found on PyPI")
 
         response.raise_for_status()
         data: dict = loads(response.content)
@@ -86,6 +90,7 @@ class PyPIOfficialSource:
         return PackageInfo(
             name=info.get("name", package),
             version=version,
+            registry=PyPIProvider.REGISTRY_NAME,
             is_prerelease=False,
         )
 
@@ -107,7 +112,7 @@ class PyPIProvider:
         fallback: bool = True,
     ) -> PackageInfo:
         if not PYPI_PACKAGE_PATTERN.match(package):
-            raise ValueError(f"Invalid package name '{package}'. Use only a-zA-Z0-9_-")
+            raise InvalidPackageNameError(f"Invalid package name '{package}'. Use only a-zA-Z0-9_-")
 
         if source:
             source_class = self.SOURCE_MAP.get(source.lower())
@@ -117,20 +122,14 @@ class PyPIProvider:
         else:
             sources = list(self.SOURCES) if fallback else [self.SOURCES[0]]
 
-        sources_failed: list[str] = []
         last_error: Exception | None = None
 
         for source_class in sources:
             try:
-                result: PackageInfo = await source_class().fetch(package, include_prerelease)
+                return await source_class().fetch(package, include_prerelease)
             except Exception as e:  # noqa: PERF203
-                sources_failed.append(source_class.NAME)
                 last_error = e
                 if not fallback:
                     raise
-            else:
-                result.registry = self.REGISTRY_NAME
-                result.source_used = source_class.NAME
-                return result
 
-        raise last_error or ValueError(f"Failed to fetch package '{package}'")
+        raise last_error or PackageNotFoundError(f"Failed to fetch package '{package}'")
